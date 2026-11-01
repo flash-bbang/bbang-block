@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="식빵 블록을 채워 줄을 터뜨리는 퍼즐. 판이 차면 식빵들이 겁먹고, 비둘기가 똥을 싸고 간다">
-<meta property="og:title" content="빵빵 블록">
-<meta property="og:description" content="식빵 블록을 채워 줄을 터뜨리는 퍼즐. 판이 차면 식빵들이 겁먹고, 비둘기가 똥을 싸고 간다">
+<meta name="description" content="식빵 블록 채워서 빵! 터뜨리는 퍼즐. 대부분 식빵만 태우고 끝남 ㅋ 설치 없이 바로 플레이">
+<meta property="og:title" content="빵빵 블록 — 내 점수 넘으면 인정 ㅋ">
+<meta property="og:description" content="식빵 블록 채워서 빵! 터뜨리는 퍼즐. 대부분 식빵만 태우고 끝남 ㅋ 설치 없이 바로 플레이">
+<meta property="og:image" content="https://flash-bbang.github.io/thumb_block.jpg">
+<meta property="og:url" content="https://flash-bbang.github.io/bbang-block/">
+<meta name="twitter:card" content="summary_large_image">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#6ed6ba">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%236ed6ba'/%3E%3Crect x='3' y='4' width='10' height='9' fill='%231c1614'/%3E%3Crect x='4' y='5' width='8' height='7' fill='%23be6034'/%3E%3Crect x='5' y='6' width='6' height='5' fill='%23fce6c4'/%3E%3Crect x='6' y='7' width='1' height='2' fill='%231c1614'/%3E%3Crect x='9' y='7' width='1' height='2' fill='%231c1614'/%3E%3C/svg%3E">
@@ -208,7 +211,14 @@ body{margin:0;background:radial-gradient(circle at 50% 30%,var(--mint-hi) 0%,var
       if (t.some(p => canPlaceAnywhere(p.shape)) || tries === 39) return t;
     }
   }
+
+  // count a play for the "most played" order on flash-bbang.github.io (fire and forget)
+  function logPlay(){
+    try { fetch('https://firestore.googleapis.com/v1/projects/space-xxx/databases/(default)/documents/plays?key=AIzaSyAOEpHjYw322A0Vfrjmp2KNw9WAYUGURtg', {method:'POST', headers:{'Content-Type':'application/json'}, keepalive:true,
+      body: JSON.stringify({fields:{game:{stringValue:'block'}, ts:{timestampValue:new Date().toISOString()}}})}).catch(() => {}); } catch(e){}
+  }
   function newGame(){
+    logPlay();
     board = empty(); score = 0; shown = 0; lines = 0; combo = 0; maxCombo = 0; sinceClear = 0; over = false; started = true;
     tray = newTray(); pops = []; crumbs = []; texts = []; pigeon = null; placements = 0; nextPigeon = 7 + Math.floor(Math.random()*4); danger = false;
     save(); updateScore(); lastAct = performance.now(); say('오늘도 구워볼까?');
@@ -421,7 +431,7 @@ body{margin:0;background:radial-gradient(circle at 50% 30%,var(--mint-hi) 0%,var
     $('quip').textContent = board.flat().includes(6) && Math.random() < .5 ? '비둘기만 신났다' : QUIPS[Math.floor(Math.random()*QUIPS.length)];
     $('fScore').textContent = score.toLocaleString(); $('fLines').textContent = lines; $('fCombo').textContent = maxCombo; $('fBest').textContent = best.toLocaleString();
     $('newbest').hidden = !isBest;
-    shareText = `빵빵 블록에서 ${score.toLocaleString()}점! 줄 ${lines}개 지움`;
+    shareText = `빵빵 블록 ${score.toLocaleString()}점 찍음 🍞 너는 식빵만 태우고 끝날 듯 ㅋㅋ 넘으면 인정해 줌`;
     setTimeout(() => { $('over').hidden = false; }, 700);
     submitScore(score, lines);
   }
